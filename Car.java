@@ -78,6 +78,14 @@ class Car {
         System.out.println("Fuel: " + fuel);
         System.out.println("Engine Capacity: " + engineCapacity + "L");
 
+        if(year <= 1990){
+            System.out.println("This car is retro");
+        } else if (year <= 2015){
+            System.out.println("This car is old");
+        } else {
+            System.out.println("This is a new car");
+        }
+
         if (price <= 10000) {
             System.out.println("low-end car");
         } else if (price <= 20000) {
