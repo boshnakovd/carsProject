@@ -1,3 +1,7 @@
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 class Car {
     private String brand;
     private String model;
@@ -5,6 +9,9 @@ class Car {
     private double price;
     private String fuel;
     private double engineCapacity;
+
+
+
 
     public Car(String brand, String model, int year, double price, String fuel, double engineCapacity) {
         this.brand = brand;
@@ -39,8 +46,6 @@ class Car {
     public double getEngineCapacity() {
         return engineCapacity;
     }
-
-    // Setters
     public void setBrand(String brand) {
         this.brand = brand;
     }
@@ -101,8 +106,115 @@ class Car {
                 break;
         }
     }
+    public void insertIntoDatabase() {
+        try {
+            // Establish a connection to the database
+            Connection connection =
+                    DriverManager.getConnection("jdbc:mysql://localhost:3306/carinfo", "root", "1902");
 
+            // Create the SQL insert statement
+            String insertQuery = "INSERT INTO cars (brand, model, year, price, fuel, engine_capacity) VALUES (?, ?, ?, ?, ?, ?)";
 
+            // Prepare the statement
+            PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+
+            // Set the parameter values
+            preparedStatement.setString(1, brand);
+            preparedStatement.setString(2, model);
+            preparedStatement.setInt(3, year);
+            preparedStatement.setDouble(4, price);
+            preparedStatement.setString(5, fuel);
+            preparedStatement.setDouble(6, engineCapacity);
+
+            // Execute the statement
+            preparedStatement.executeUpdate();
+
+            // Close the resources
+            preparedStatement.close();
+            connection.close();
+
+            System.out.println("Car record inserted into the database.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Retrieve all car records from the database
+    public static List<Car> getAllFromDatabase() {
+        List<Car> carList = new ArrayList<>();
+
+        try {
+            // Establish a connection to the database
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/your_database_name", "username", "password");
+
+            // Create the SQL select statement
+            String selectQuery = "SELECT * FROM cars";
+
+            // Prepare the statement
+            Statement statement = connection.createStatement();
+
+            // Execute the query
+            ResultSet resultSet = statement.executeQuery(selectQuery);
+
+            // Process the result set
+            while (resultSet.next()) {
+                String brand = resultSet.getString("brand");
+                String model = resultSet.getString("model");
+                int year = resultSet.getInt("year");
+                double price = resultSet.getDouble("price");
+                String fuel = resultSet.getString("fuel");
+                double engineCapacity = resultSet.getDouble("engine_capacity");
+
+                Car car = new Car(brand, model, year, price, fuel, engineCapacity);
+                carList.add(car);
+            }
+
+            // Close the resources
+            resultSet.close();
+            statement.close();
+            connection.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return carList;
+    }
+
+    // Delete a car record from the database
+    public void deleteFromDatabase() {
+        try {
+            // Establish a connection to the database
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/your_database_name", "username", "password");
+
+            // Create the SQL delete statement
+            String deleteQuery = "DELETE FROM cars WHERE brand = ? AND model = ?";
+
+            // Prepare the statement
+            PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery);
+
+            // Set the parameter values
+            preparedStatement.setString(1, brand);
+            preparedStatement.setString(2, model);
+
+            // Execute the statement
+            preparedStatement.executeUpdate();
+
+            // Close the resources
+            preparedStatement.close();
+            connection.close();
+
+            System.out.println("Car record deleted from the database.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
+
+
+
 
 
