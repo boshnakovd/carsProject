@@ -66,15 +66,15 @@ public class Main {
             car.displayInfo();
             System.out.println();
         }
-        // Insert car records into the database
+
         for (Car car : carList) {
             car.insertIntoDatabase();
         }
 
-        // Retrieve car records from the database
+
         List<Car> carListFromDatabase = Car.getAllFromDatabase();
 
-        // Display car information
+
         for (Car car : carListFromDatabase) {
             System.out.println("Car:");
             car.displayInfo();
