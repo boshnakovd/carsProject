@@ -52,7 +52,6 @@ public class Main {
             System.out.println();
         }
 
-        scanner.close();
 
         for (int i = 0; i < carList.size(); i++) {
             System.out.println("Car " + (i + 1) + ":");
@@ -79,6 +78,21 @@ public class Main {
             System.out.println("Car:");
             car.displayInfo();
             System.out.println();
+        }
+        System.out.println("Enter the brand to search for:");
+        String searchBrand = scanner.nextLine();
+
+        List<Car> searchResults = Car.searchByBrand(searchBrand);
+
+        System.out.println("Search results:");
+        if (searchResults.isEmpty()) {
+            System.out.println("No cars found with the given brand.");
+        } else {
+            for (Car car : searchResults) {
+                System.out.println("Car:");
+                car.displayInfo();
+                System.out.println();
+            }
         }
     }
 }

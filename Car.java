@@ -228,7 +228,45 @@ class Car {
             throw new SQLException("Unable to find the database");
         }
     }
+    public static List<Car> searchByBrand(String searchBrand) {
+        List<Car> carList = new ArrayList<>();
+
+        try {
+            String url = "jdbc:mysql://localhost:3306/carinfo";
+            String username = "root";
+            String password = "1902";
+
+            Connection connection = DriverManager.getConnection(url, username, password);
+
+            String searchQuery = "SELECT * FROM cars WHERE brand LIKE ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(searchQuery);
+            preparedStatement.setString(1, "%" + searchBrand + "%");
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                String brand = resultSet.getString("brand");
+                String model = resultSet.getString("model");
+                int year = resultSet.getInt("year");
+                double price = resultSet.getDouble("price");
+                String fuel = resultSet.getString("fuel");
+                double engineCapacity = resultSet.getDouble("engine_capacity");
+
+                Car car = new Car(brand, model, year, price, fuel, engineCapacity);
+                carList.add(car);
+            }
+
+            resultSet.close();
+            preparedStatement.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return carList;
+    }
 }
+
 
 
 
