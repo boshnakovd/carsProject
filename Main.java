@@ -1,257 +1,313 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
 import java.util.Locale;
 import java.util.Scanner;
 
-
-
 public class Main {
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/carinfo?createDatabaseIfNotExist=true";
+    private static final String DB_USERNAME = "root";
+    private static final String DB_PASSWORD = "1902";
+
     public static void main(String[] args) {
-        // Create the table if it doesn't exist
         createTable();
 
-        List<Car> carList = new ArrayList<>();
+        try (Scanner scanner = new Scanner(System.in)) {
+            int choice;
+            do {
+                System.out.println("Choose an option:");
+                System.out.println("1. Add a car");
+                System.out.println("2. Search cars");
+                System.out.println("3. Update/Delete cars");
+                System.out.println("4. Exit");
+                System.out.print("Enter your choice: ");
+                choice = scanner.nextInt();
+                scanner.nextLine();
+                scanner.useLocale(Locale.US); // Consume newline character
 
-        Scanner scanner = new Scanner(System.in);
-        scanner.useLocale(Locale.US);
-
-        while (true) {
-            System.out.println("Choose an option:");
-            System.out.println("1. Add a car");
-            System.out.println("2. Search cars");
-            System.out.println("3. Update/Delete cars");
-            System.out.println("4. Exit");
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-
-            switch (choice) {
-                case 1:
-                    addCar(carList, scanner);
-                    break;
-                case 2:
-                    searchCars(carList, scanner);
-                    break;
-                case 3:
-                    updateOrDeleteCars(carList, scanner);
-                    break;
-                case 4:
-                    System.out.println("Exiting the program.");
-                    scanner.close();
-                    return;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-
-            System.out.println();
+                switch (choice) {
+                    case 1:
+                        addCar(scanner);
+                        break;
+                    case 2:
+                        searchCars();
+                        break;
+                    case 3:
+                        updateOrDeleteCars(scanner);
+                        break;
+                    case 4:
+                        System.out.println("Exiting the program...");
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+                System.out.println();
+            } while (choice != 4);
         }
     }
 
-    // Helper method to create the "cars" table in the database
     private static void createTable() {
-        String url = "jdbc:mysql://localhost:3306/carinfo";
-        String username = "root";
-        String password = "1902";
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             Statement statement = connection.createStatement()) {
 
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
             String createTableQuery = "CREATE TABLE IF NOT EXISTS cars (" +
-                    "id INT AUTO_INCREMENT PRIMARY KEY," +
-                    "brand VARCHAR(50) NOT NULL," +
-                    "model VARCHAR(50) NOT NULL," +
+                    "id INT PRIMARY KEY AUTO_INCREMENT," +
+                    "brand VARCHAR(255) NOT NULL," +
+                    "model VARCHAR(255) NOT NULL," +
                     "year INT NOT NULL," +
-                    "price DECIMAL(10,2) NOT NULL," +
+                    "price DOUBLE NOT NULL," +
                     "fuel VARCHAR(50) NOT NULL," +
-                    "engine_capacity DOUBLE NOT NULL," +
-                    "color VARCHAR(50) NOT NULL" +
+                    "engineCapacity DOUBLE NOT NULL," +
+                    "color VARCHAR(50) NOT NULL," +
+                    "transmission VARCHAR(50) NOT NULL," +
+                    "mileage INT NOT NULL," +
+                    "numberOfSeats INT NOT NULL," +
+                    "numOfDoors VARCHAR(50) NOT NULL" +
                     ")";
 
-            Statement statement = connection.createStatement();
             statement.executeUpdate(createTableQuery);
-            System.out.println("Table created successfully.");
+            System.out.println("Table 'car' created successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    private static void addCar(List<Car> carList, Scanner scanner) {
+    private static void addCar(Scanner scanner) {
         System.out.println("Enter details for the car:");
-
         System.out.print("Brand: ");
         String brand = scanner.nextLine();
-
         System.out.print("Model: ");
         String model = scanner.nextLine();
-
-        int year;
-        while (true) {
-            System.out.print("Year: ");
-            year = scanner.nextInt();
-            scanner.nextLine();
-
-            if (year >= 1890) {
-                break;
-            } else {
-                System.out.println("Invalid year. Please enter a year not less than 1890.");
-            }
-        }
-
-        System.out.print("Price: ");
-        double price = scanner.nextDouble();
-        scanner.nextLine();
-
-        System.out.print("Fuel: ");
-        FuelType fuel = FuelType.valueOf(scanner.nextLine().toUpperCase());
-
-        System.out.print("Engine capacity: ");
-        double engineCapacity = scanner.nextDouble();
-        scanner.nextLine();
-
-        System.out.print("Color: ");
-        String color = scanner.nextLine();
-
-        Car car = new Car(brand, model, year, price, fuel, engineCapacity, color);
-        car.insertIntoDatabase();
-        carList.add(car);
-
-        System.out.println("Car added successfully.");
-    }
-
-    private static void searchCars(List<Car> carList, Scanner scanner) {
-        System.out.print("Enter the brand to search for: ");
-        String searchBrand = scanner.nextLine();
-
-        List<Car> searchResults = searchByBrand(carList, searchBrand);
-
-        System.out.println("Search results:");
-        if (searchResults.isEmpty()) {
-            System.out.println("No cars found with the given brand.");
-        } else {
-            for (Car car : searchResults) {
-                System.out.println("Car:");
-                car.displayInfo();
-                System.out.println();
-            }
-        }
-    }
-
-    private static List<Car> searchByBrand(List<Car> carList, String searchBrand) {
-        List<Car> result = new ArrayList<>();
-
-        for (Car car : carList) {
-            if (car.getBrand().equalsIgnoreCase(searchBrand)) {
-                result.add(car);
-            }
-        }
-
-        return result;
-    }
-
-    private static void updateOrDeleteCars(List<Car> carList, Scanner scanner) {
-        displayCarList(carList);
-
-        System.out.print("Select a car by index to update or delete (0 to cancel): ");
-        int selectedCarIndex = scanner.nextInt();
-        scanner.nextLine();
-
-        if (selectedCarIndex == 0) {
-            System.out.println("Operation cancelled.");
-            return;
-        }
-
-        if (selectedCarIndex < 1 || selectedCarIndex > carList.size()) {
-            System.out.println("Invalid car index.");
-            return;
-        }
-
-        Car selectedCar = carList.get(selectedCarIndex - 1);
-
-        System.out.println("Selected Car:");
-        selectedCar.displayInfo();
-
-        System.out.println("Choose an operation:");
-        System.out.println("1. Update car details");
-        System.out.println("2. Delete car");
-        System.out.println("3. Cancel");
-        System.out.print("Enter your choice: ");
-        int operationChoice = scanner.nextInt();
-        scanner.nextLine();
-
-        switch (operationChoice) {
-            case 1:
-                updateCarDetails(selectedCar, scanner);
-                break;
-            case 2:
-                deleteCar(selectedCar, carList);
-                break;
-            case 3:
-                System.out.println("Operation cancelled.");
-                break;
-            default:
-                System.out.println("Invalid choice.");
-        }
-
-        System.out.println();
-    }
-
-    private static void displayCarList(List<Car> carList) {
-        System.out.println("Car List:");
-        for (int i = 0; i < carList.size(); i++) {
-            System.out.println("Car " + (i + 1) + ":");
-            carList.get(i).displayInfo();
-            System.out.println();
-        }
-    }
-
-    private static void updateCarDetails(Car car, Scanner scanner) {
-        System.out.println("Update Car Details:");
-
-        System.out.print("Brand: ");
-        String brand = scanner.nextLine();
-        car.setBrand(brand);
-
-        System.out.print("Model: ");
-        String model = scanner.nextLine();
-        car.setModel(model);
-
         System.out.print("Year: ");
         int year = scanner.nextInt();
-        scanner.nextLine();
-        car.setYear(year);
-
         System.out.print("Price: ");
         double price = scanner.nextDouble();
-        scanner.nextLine();
-        car.setPrice(price);
-
-        System.out.print("Fuel: ");
-        FuelType fuel = FuelType.valueOf(scanner.nextLine().toUpperCase());
-        car.setFuel(fuel);
-
-        System.out.print("Engine Capacity: ");
+        scanner.nextLine(); // Consume newline character
+        System.out.print("Fuel (diesel, petrol, methane, LPG, electric): ");
+        String fuel = scanner.nextLine();
+        System.out.print("Engine capacity: ");
         double engineCapacity = scanner.nextDouble();
-        scanner.nextLine();
-        car.setEngineCapacity(engineCapacity);
-
+        scanner.nextLine(); // Consume newline character
         System.out.print("Color: ");
         String color = scanner.nextLine();
-        car.setColor(color);
+        System.out.print("Transmission (manual, semi auto, auto, no transmission): ");
+        TransmissionType transmission = TransmissionType.valueOf(scanner.nextLine().toUpperCase());
+        System.out.print("Mileage: ");
+        int mileage = scanner.nextInt();
+        System.out.print("Number of seats: ");
+        int numberOfSeats = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+        System.out.print("Number of doors (2/3 or 4/5): ");
+        String numOfDoorsStr = scanner.nextLine();
+        NumOfDoors numOfDoors;
 
-        car.insertIntoDatabase();
+        if (numOfDoorsStr.equals("2/3")) {
+            numOfDoors = NumOfDoors.TWO;
+        } else if (numOfDoorsStr.equals("4/5")) {
+            numOfDoors = NumOfDoors.FOUR;
+        } else {
+            System.out.println("Invalid number of doors. Defaulting to 4/5 doors.");
+            numOfDoors = NumOfDoors.FOUR;
+        }
 
-        System.out.println("Car details updated.");
+        Car car = new Car(brand, model, year, price, fuel, engineCapacity, color, transmission, mileage, numberOfSeats, numOfDoors);
+        addCarToDatabase(car);
+        System.out.println("Car added successfully.");
+    }
+    private static void addCarToDatabase(Car car) {
+        String insertQuery = "INSERT INTO cars (brand, model, year, price, fuel, engineCapacity, color, transmission, mileage, numberOfSeats, numOfDoors) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(insertQuery)) {
+
+            statement.setString(1, car.getBrand());
+            statement.setString(2, car.getModel());
+            statement.setInt(3, car.getYear());
+            statement.setDouble(4, car.getPrice());
+            statement.setString(5, car.getFuel());
+            statement.setDouble(6, car.getEngineCapacity());
+            statement.setString(7, car.getColor());
+            statement.setString(8, car.getTransmission().toString());
+            statement.setInt(9, car.getMileage());
+            statement.setInt(10, car.getNumberOfSeats());
+            statement.setString(11, car.getNumOfDoors().toString());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    private static void deleteCar(Car car, List<Car> carList) {
-        try {
-            car.deleteFromDatabase();
-            carList.remove(car);
-            System.out.println("Car deleted.");
+    private static void searchCars() {
+        String selectQuery = "SELECT * FROM cars";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(selectQuery)) {
+
+            System.out.println("List of cars:");
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String brand = resultSet.getString("brand");
+                String model = resultSet.getString("model");
+                int year = resultSet.getInt("year");
+                double price = resultSet.getDouble("price");
+                String fuel = resultSet.getString("fuel");
+                double engineCapacity = resultSet.getDouble("engineCapacity");
+                String color = resultSet.getString("color");
+                String transmission = resultSet.getString("transmission");
+                int mileage = resultSet.getInt("mileage");
+                int numberOfSeats = resultSet.getInt("numberOfSeats");
+                String numOfDoorsStr = resultSet.getString("numOfDoors");
+                NumOfDoors numOfDoors = NumOfDoors.valueOf(numOfDoorsStr.toUpperCase());
+
+                Car car = new Car(brand, model, year, price, fuel, engineCapacity, color,
+                        TransmissionType.valueOf(transmission.toUpperCase()), mileage, numberOfSeats, numOfDoors);
+                car.setId(id);
+
+                System.out.println(car);
+            }
         } catch (SQLException e) {
-            System.out.println("Unable to delete the car from the database.");
+            e.printStackTrace();
+        }
+    }
+
+    private static void updateOrDeleteCars(Scanner scanner) {
+        System.out.println("Enter car ID: ");
+        int carId = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+
+        String selectQuery = "SELECT * FROM cars WHERE id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement selectStatement = connection.prepareStatement(selectQuery)) {
+
+            selectStatement.setInt(1, carId);
+            ResultSet resultSet = selectStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String brand = resultSet.getString("brand");
+                String model = resultSet.getString("model");
+                int year = resultSet.getInt("year");
+                double price = resultSet.getDouble("price");
+                String fuel = resultSet.getString("fuel");
+                double engineCapacity = resultSet.getDouble("engineCapacity");
+                String color = resultSet.getString("color");
+                String transmission = resultSet.getString("transmission");
+                int mileage = resultSet.getInt("mileage");
+                int numberOfSeats = resultSet.getInt("numberOfSeats");
+                String numOfDoorsStr = resultSet.getString("numOfDoors");
+                NumOfDoors numOfDoors = NumOfDoors.valueOf(numOfDoorsStr.toUpperCase());
+
+                Car car = new Car(brand, model, year, price, fuel, engineCapacity, color,
+                        TransmissionType.valueOf(transmission.toUpperCase()), mileage, numberOfSeats, numOfDoors);
+                car.setId(id);
+
+                System.out.println("Car found:");
+                System.out.println(car);
+
+                System.out.println("Choose an option:");
+                System.out.println("1. Update car");
+                System.out.println("2. Delete car");
+                System.out.print("Enter your choice: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline character
+
+                if (choice == 1) {
+                    updateCar(scanner, car);
+                } else if (choice == 2) {
+                    deleteCar(car);
+                } else {
+                    System.out.println("Invalid choice.");
+                }
+            } else {
+                System.out.println("Car not found.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void updateCar(Scanner scanner, Car car) {
+        System.out.println("Enter updated details for the car:");
+        System.out.print("Brand: ");
+        String brand = scanner.nextLine();
+        System.out.print("Model: ");
+        String model = scanner.nextLine();
+        System.out.print("Year: ");
+        int year = scanner.nextInt();
+        System.out.print("Price: ");
+        double price = scanner.nextDouble();
+        scanner.nextLine(); // Consume newline character
+        System.out.print("Fuel (diesel, petrol, methane, LPG, electric): ");
+        String fuel = scanner.nextLine();
+        System.out.print("Engine capacity: ");
+        double engineCapacity = scanner.nextDouble();
+        scanner.nextLine(); // Consume newline character
+        System.out.print("Color: ");
+        String color = scanner.nextLine();
+        System.out.print("Transmission (manual, semi auto, auto, no transmission): ");
+        TransmissionType transmission = TransmissionType.valueOf(scanner.nextLine().toUpperCase());
+        System.out.print("Mileage: ");
+        int mileage = scanner.nextInt();
+        System.out.print("Number of seats: ");
+        int numberOfSeats = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+        System.out.print("Number of doors (2/3 or 4/5): ");
+        NumOfDoors numOfDoors = NumOfDoors.valueOf(scanner.nextLine().toUpperCase());
+
+        car.setBrand(brand);
+        car.setModel(model);
+        car.setYear(year);
+        car.setPrice(price);
+        car.setFuel(fuel);
+        car.setEngineCapacity(engineCapacity);
+        car.setColor(color);
+        car.setTransmission(transmission);
+        car.setMileage(mileage);
+        car.setNumberOfSeats(numberOfSeats);
+        car.setNumOfDoors(numOfDoors);
+
+        updateCarInDatabase(car);
+        System.out.println("Car updated successfully.");
+    }
+
+    private static void updateCarInDatabase(Car car) {
+        String updateQuery = "UPDATE cars SET brand = ?, model = ?, year = ?, price = ?, fuel = ?, " +
+                "engineCapacity = ?, color = ?, transmission = ?, mileage = ?, numberOfSeats = ?, numOfDoors = ? WHERE id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+
+            statement.setString(1, car.getBrand());
+            statement.setString(2, car.getModel());
+            statement.setInt(3, car.getYear());
+            statement.setDouble(4, car.getPrice());
+            statement.setString(5, car.getFuel());
+            statement.setDouble(6, car.getEngineCapacity());
+            statement.setString(7, car.getColor());
+            statement.setString(8, car.getTransmission().toString());
+            statement.setInt(9, car.getMileage());
+            statement.setInt(10, car.getNumberOfSeats());
+            statement.setString(11, car.getNumOfDoors().toString());
+            statement.setInt(12, car.getId());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void deleteCar(Car car) {
+        String deleteQuery = "DELETE FROM cars WHERE id = ?";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+             PreparedStatement statement = connection.prepareStatement(deleteQuery)) {
+
+            statement.setInt(1, car.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }
