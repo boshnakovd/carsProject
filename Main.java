@@ -60,7 +60,7 @@ public class Main {
                     "transmission VARCHAR(50) NOT NULL," +
                     "mileage INT NOT NULL," +
                     "numberOfSeats INT NOT NULL," +
-                    "numOfDoors VARCHAR(50) NOT NULL" +
+                    "numOfDoors INT NOT NULL" +
                     ")";
 
             statement.executeUpdate(createTableQuery);
@@ -95,19 +95,9 @@ public class Main {
         System.out.print("Number of seats: ");
         int numberOfSeats = scanner.nextInt();
         scanner.nextLine(); // Consume newline character
-        System.out.print("Number of doors (2/3 or 4/5): ");
+        System.out.print("Number of doors: ");
         String numOfDoorsStr = scanner.nextLine();
-        NumOfDoors numOfDoors;
-
-        if (numOfDoorsStr.equals("2/3")) {
-            numOfDoors = NumOfDoors.TWO;
-        } else if (numOfDoorsStr.equals("4/5")) {
-            numOfDoors = NumOfDoors.FOUR;
-        } else {
-            System.out.println("Invalid number of doors. Defaulting to 4/5 doors.");
-            numOfDoors = NumOfDoors.FOUR;
-        }
-
+        String numOfDoors = scanner.nextLine();
         Car car = new Car(brand, model, year, price, fuel, engineCapacity, color, transmission, mileage, numberOfSeats, numOfDoors);
         addCarToDatabase(car);
         System.out.println("Car added successfully.");
@@ -129,7 +119,7 @@ public class Main {
             statement.setString(8, car.getTransmission().toString());
             statement.setInt(9, car.getMileage());
             statement.setInt(10, car.getNumberOfSeats());
-            statement.setString(11, car.getNumOfDoors().toString());
+            statement.setString(11, car.getNumOfDoors());
 
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -157,8 +147,7 @@ public class Main {
                 String transmission = resultSet.getString("transmission");
                 int mileage = resultSet.getInt("mileage");
                 int numberOfSeats = resultSet.getInt("numberOfSeats");
-                String numOfDoorsStr = resultSet.getString("numOfDoors");
-                NumOfDoors numOfDoors = NumOfDoors.valueOf(numOfDoorsStr.toUpperCase());
+                String numOfDoors = resultSet.getString("numOfDoors");
 
                 Car car = new Car(brand, model, year, price, fuel, engineCapacity, color,
                         TransmissionType.valueOf(transmission.toUpperCase()), mileage, numberOfSeats, numOfDoors);
@@ -197,7 +186,7 @@ public class Main {
                 int mileage = resultSet.getInt("mileage");
                 int numberOfSeats = resultSet.getInt("numberOfSeats");
                 String numOfDoorsStr = resultSet.getString("numOfDoors");
-                NumOfDoors numOfDoors = NumOfDoors.valueOf(numOfDoorsStr.toUpperCase());
+                String numOfDoors = numOfDoorsStr.toUpperCase();
 
                 Car car = new Car(brand, model, year, price, fuel, engineCapacity, color,
                         TransmissionType.valueOf(transmission.toUpperCase()), mileage, numberOfSeats, numOfDoors);
@@ -253,8 +242,8 @@ public class Main {
         System.out.print("Number of seats: ");
         int numberOfSeats = scanner.nextInt();
         scanner.nextLine(); // Consume newline character
-        System.out.print("Number of doors (2/3 or 4/5): ");
-        NumOfDoors numOfDoors = NumOfDoors.valueOf(scanner.nextLine().toUpperCase());
+        System.out.print("Number of doors: ");
+        String numOfDoors = scanner.nextLine().toUpperCase();
 
         car.setBrand(brand);
         car.setModel(model);

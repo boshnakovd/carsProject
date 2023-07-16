@@ -10,10 +10,10 @@ public class Car {
     private TransmissionType transmission;
     private int mileage;
     private int numberOfSeats;
-    private NumOfDoors numOfDoors;
+    private String numOfDoors;
 
     public Car(String brand, String model, int year, double price, String fuel, double engineCapacity, String color,
-               TransmissionType transmission, int mileage, int numberOfSeats, NumOfDoors numOfDoors) {
+               TransmissionType transmission, int mileage, int numberOfSeats, String numOfDoors) {
         this.brand = brand;
         this.model = model;
         this.year = year;
@@ -118,11 +118,11 @@ public class Car {
         this.numberOfSeats = numberOfSeats;
     }
 
-    public NumOfDoors getNumOfDoors() {
+    public String getNumOfDoors() {
         return numOfDoors;
     }
 
-    public void setNumOfDoors(NumOfDoors numOfDoors) {
+    public void setNumOfDoors(String numOfDoors) {
         this.numOfDoors = numOfDoors;
     }
 
