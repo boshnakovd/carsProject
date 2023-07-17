@@ -23,7 +23,7 @@ public class Main {
                 System.out.print("Enter your choice: ");
                 choice = scanner.nextInt();
                 scanner.nextLine();
-                scanner.useLocale(Locale.US); // Consume newline character
+                scanner.useLocale(Locale.US);
 
                 switch (choice) {
                     case 1:
@@ -95,14 +95,14 @@ public class Main {
         System.out.print("Price: ");
         double price = scanner.nextDouble();
 
-        scanner.nextLine(); // Consume newline character
+        scanner.nextLine();
 
         System.out.print("Fuel (diesel, petrol, methane, LPG, electric): ");
         String fuel = scanner.nextLine();
         System.out.print("Engine capacity: ");
         double engineCapacity = scanner.nextDouble();
 
-        scanner.nextLine(); // Consume newline character
+        scanner.nextLine();
 
         System.out.print("Color: ");
         String color = scanner.nextLine();
@@ -116,12 +116,12 @@ public class Main {
         System.out.print("Number of seats: ");
         int numberOfSeats = scanner.nextInt();
 
-        scanner.nextLine(); // Consume newline character
+        scanner.nextLine();
 
         System.out.print("Number of doors: ");
         int numOfDoors = scanner.nextInt();
 
-        scanner.nextLine(); // Consume newline character
+        scanner.nextLine();
 
         System.out.print("Category(SUV, hatchback, sedan, pickup, truck, minivan, van, cabrio, liftback, kombi): ");
         Category category = Category.valueOf(scanner.nextLine().toUpperCase());
@@ -198,7 +198,7 @@ public class Main {
     private static void updateOrDeleteCars(Scanner scanner) {
         System.out.println("Enter car ID: ");
         int carId = scanner.nextInt();
-        scanner.nextLine(); // Consume newline character
+        scanner.nextLine();
 
         String selectQuery = "SELECT * FROM cars WHERE id = ?";
 
@@ -235,7 +235,7 @@ public class Main {
                 System.out.println("2. Delete car");
                 System.out.print("Enter your choice: ");
                 int choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline character
+                scanner.nextLine();
 
                 if (choice == 1) {
                     updateCar(scanner, car);
