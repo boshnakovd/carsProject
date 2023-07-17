@@ -1,4 +1,4 @@
-public class Car {
+class Car {
     private int id;
     private String brand;
     private String model;
@@ -10,10 +10,11 @@ public class Car {
     private TransmissionType transmission;
     private int mileage;
     private int numberOfSeats;
-    private String numOfDoors;
+    private int numOfDoors;
+    private Category category;
 
     public Car(String brand, String model, int year, double price, String fuel, double engineCapacity, String color,
-               TransmissionType transmission, int mileage, int numberOfSeats, String numOfDoors) {
+               TransmissionType transmission, int mileage, int numberOfSeats, int numOfDoors, Category category) {
         this.brand = brand;
         this.model = model;
         this.year = year;
@@ -25,10 +26,8 @@ public class Car {
         this.mileage = mileage;
         this.numberOfSeats = numberOfSeats;
         this.numOfDoors = numOfDoors;
+        this.category = category;
     }
-
-    // Getters and setters...
-
 
     public int getId() {
         return id;
@@ -118,12 +117,20 @@ public class Car {
         this.numberOfSeats = numberOfSeats;
     }
 
-    public String getNumOfDoors() {
+    public int getNumOfDoors() {
         return numOfDoors;
     }
 
-    public void setNumOfDoors(String numOfDoors) {
+    public void setNumOfDoors(int numOfDoors) {
         this.numOfDoors = numOfDoors;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     @Override
@@ -141,6 +148,7 @@ public class Car {
                 ", mileage=" + mileage +
                 ", numberOfSeats=" + numberOfSeats +
                 ", numOfDoors=" + numOfDoors +
+                ", category=" + category +
                 '}';
     }
 }
